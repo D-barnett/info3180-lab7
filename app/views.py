@@ -23,37 +23,39 @@ def home():
 
 @app.route('/api/thumbnails')
 def get_thumbnails():
-    
-    url = "https://www.walmart.com/ip/54649026"
-    result = requests.get(url)
-    soup = BeautifulSoup(result.text, "html.parser")
-    
-     # This will look for a meta tag with the og:image property
-    og_image = (soup.find('meta', property='og:image') or
-                    soup.find('meta', attrs={'name': 'og:image'}))
-    if og_image and og_image['content']:
-       print og_image['content']
-       print ''
-       
-     # This will look for a link tag with a rel attribute set to 'image_src'
-    thumbnail_spec = soup.find('link', rel='image_src')
-    if thumbnail_spec and thumbnail_spec['href']:
-       print thumbnail_spec['href']
-       print ''
-       
-    for link in soup.find_all('a'):
-        thumbnails= link.get('href')
-        print thumbnails
         
     data={
-              'error': 'null', 
+              'error': "null", 
               'message': "Success", 
-              'thumbnails': [thumbnails]
+              'thumbnails': getimages()
             }
+    
     return jsonify(data)
 
+def getimages():
+   url = "https://www.walmart.com/ip/54649026"
+   result = requests.get(url)
+   soup = BeautifulSoup(result.text, "html.parser")
 
-@app.route('/thumbnails/view', methods=['POST'])
+   imagelisting = []
+
+   # This will look for a meta tag with the og:image property
+   og_image = (soup.find('meta', property='og:image') or
+	                    soup.find('meta', attrs={'name': 'og:image'}))
+   if og_image and og_image['content']:
+       imagelisting.append(og_image['content'])
+
+   # This will look for a link tag with a rel attribute set to 'image_src'
+   thumbnail_spec = soup.find('link', rel='image_src')
+   if thumbnail_spec and thumbnail_spec['href']:
+       imagelisting.append(thumbnail_spec['href'])
+
+   for img in soup.findAll("img", src=True):
+       if img["src"] not in imagelisting: # removes duplication of urls
+           imagelisting.append(img['src'])
+   return imagelisting
+
+@app.route('/thumbnails/view')
 def viewthumbnails():
     return render_template('view.html') 
        

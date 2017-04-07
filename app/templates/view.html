@@ -1,16 +1,20 @@
-{% extends base.html %}
+{% extends "base.html" %}
 
 
 {% block main %}
-<script src="https://ajax.googleapis.com/ajax/libs/ angularjs/1.6.1/angular.min.js"></script>
+
 <div ng-app="ApplianceMarketApp" ng-controller="MainController">
-    <ul>
-        <h2> Appliances and Electronics</h2>
-        <li ng-repeat="product in products" class="col-md-6">
-            <img ng-src="{{ product.thumbnails}}" />
-        </li>
-    </ul>
+    <h2> Appliances and Electronics</h2>
+    <div>
+        <img ng-repeat="product in products">
+            <div><img ng-src="{{ product}}" /></div>
+    </div>
 </div> 
 
 <script src="static/js/MainController.js"></script>
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static',filename='js/angular.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/MainController.js') }}"></script>
 {% endblock %}

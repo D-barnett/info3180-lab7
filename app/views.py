@@ -6,10 +6,11 @@ This file creates your application.
 """
 
 from app import app
-from flask import render_template, request, redirect, url_for, jsonify
+from flask import render_template, request, redirect, url_for, jsonify, make_response
 from bs4 import BeautifulSoup
 import requests
 import urlparse
+from imagegetter import getimages
 
 ###
 # Routing for your application.
@@ -21,39 +22,17 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/api/thumbnails')
+@app.route('/api/thumbnails', methods=['GET', 'POST'])
 def get_thumbnails():
-        
-    data={
-              'error': "null", 
+    #if request.method=='POST':
+        images=getimages()
+        reply=None
+        msg={
+              'error': reply, 
               'message': "Success", 
-              'thumbnails': getimages()
+              'thumbnails': images
             }
-    
-    return jsonify(data)
-
-def getimages():
-   url = "https://www.walmart.com/ip/54649026"
-   result = requests.get(url)
-   soup = BeautifulSoup(result.text, "html.parser")
-
-   imagelisting = []
-
-   # This will look for a meta tag with the og:image property
-   og_image = (soup.find('meta', property='og:image') or
-	                    soup.find('meta', attrs={'name': 'og:image'}))
-   if og_image and og_image['content']:
-       imagelisting.append(og_image['content'])
-
-   # This will look for a link tag with a rel attribute set to 'image_src'
-   thumbnail_spec = soup.find('link', rel='image_src')
-   if thumbnail_spec and thumbnail_spec['href']:
-       imagelisting.append(thumbnail_spec['href'])
-
-   for img in soup.findAll("img", src=True):
-       if img["src"] not in imagelisting: # removes duplication of urls
-           imagelisting.append(img['src'])
-   return imagelisting
+        return jsonify(msg)
 
 @app.route('/thumbnails/view')
 def viewthumbnails():
